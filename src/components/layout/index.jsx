@@ -1,10 +1,12 @@
 import React from "react";
-
+import {BrowserRouter as Router} from 'react-router-dom'
+import RouterView from '../../router/index'
 class Layout extends React.Component {
     render() {
-        const { children } = this.props;
         return <section className="content">
-            {children}
+            <Router>
+                <RouterView></RouterView>
+            </Router>
         </section>
     }
 }

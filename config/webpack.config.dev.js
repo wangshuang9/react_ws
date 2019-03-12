@@ -1,4 +1,4 @@
-'use strict';
+
 
 const fs = require('fs');
 const path = require('path');
@@ -38,41 +38,89 @@ const cssRegex = /\.css$/;
 const cssModuleRegex = /\.module\.css$/;
 const sassRegex = /\.(scss|sass)$/;
 const sassModuleRegex = /\.module\.(scss|sass)$/;
-
+const lessRegex = /\.less$/;
+const lessModuleRegex = /\.module\.less$/;
 // common function to get style loaders
+// const getStyleLoaders = (cssOptions, preProcessor) => {
+//     const loaders = [
+//         require.resolve('style-loader'),
+//         {
+//             loader: require.resolve('css-loader'),
+//             options: cssOptions,
+//         },
+//         {
+//             // Options for PostCSS as we reference these options twice
+//             // Adds vendor prefixing based on your specified browser support in
+//             // package.json
+//             loader: require.resolve('postcss-loader'),
+//             options: {
+//                 // Necessary for external CSS imports to work
+//                 // https://github.com/facebook/create-react-app/issues/2677
+//                 ident: 'postcss',
+//                 plugins: () => [
+//                     require('postcss-flexbugs-fixes'),
+//                     require('postcss-preset-env')({
+//                         autoprefixer: {
+//                             flexbox: 'no-2009',
+//                         },
+//                         stage: 3,
+//                     }),
+//                 ],
+//             },
+//         },
+//     ];
+ // common function to get style loaders
 const getStyleLoaders = (cssOptions, preProcessor) => {
     const loaders = [
-        require.resolve('style-loader'),
-        {
-            loader: require.resolve('css-loader'),
-            options: cssOptions,
+      require.resolve('style-loader'),
+      {
+        loader: require.resolve('css-loader'),
+        options: cssOptions,
+      },
+      {
+        // Options for PostCSS as we reference these options twice
+        // Adds vendor prefixing based on your specified browser support in
+        // package.json
+        loader: require.resolve('postcss-loader'),
+        options: {
+          // Necessary for external CSS imports to work
+          // https://github.com/facebook/create-react-app/issues/2677
+          ident: 'postcss',
+          plugins: () => [
+            require('postcss-flexbugs-fixes'),
+            require('postcss-preset-env')({
+              autoprefixer: {
+                flexbox: 'no-2009',
+              },
+              stage: 3,
+            }),
+          ],
         },
-        {
-            // Options for PostCSS as we reference these options twice
-            // Adds vendor prefixing based on your specified browser support in
-            // package.json
-            loader: require.resolve('postcss-loader'),
-            options: {
-                // Necessary for external CSS imports to work
-                // https://github.com/facebook/create-react-app/issues/2677
-                ident: 'postcss',
-                plugins: () => [
-                    require('postcss-flexbugs-fixes'),
-                    require('postcss-preset-env')({
-                        autoprefixer: {
-                            flexbox: 'no-2009',
-                        },
-                        stage: 3,
-                    }),
-                ],
-            },
-        },
+      },
     ];
     if (preProcessor) {
-        loaders.push(require.resolve(preProcessor));
+      let loader = require.resolve(preProcessor)
+      if (preProcessor === "less-loader") {
+        loader = {
+          loader,
+          options: {
+            modifyVars: {
+              'primary-color': '#000000',
+              'link-color': '#1DA57A',
+              'border-radius-base': '2px',
+            },
+            javascriptEnabled: true,
+          }
+        }
+      }
+      loaders.push(loader);
     }
     return loaders;
-};
+  };
+  
+    
+//     return loaders;
+// };
 
 // This is the development configuration.
 // It is focused on developer experience and fast rebuilds.
@@ -313,6 +361,23 @@ module.exports = {
                                 getLocalIdent: getCSSModuleLocalIdent,
                             },
                             'sass-loader'
+                        ),
+                    },
+                    {
+                        test: lessRegex,
+                        exclude: lessModuleRegex,
+                        use: getStyleLoaders({ importLoaders: 2 }, 'less-loader'),
+                    },
+                    // Adds support for CSS Modules, but using less
+                    // using the extension .module.scss or .module.less
+                    {
+                        test: lessModuleRegex,
+                        use: getStyleLoaders({
+                                importLoaders: 2,
+                                modules: true,
+                                getLocalIdent: getCSSModuleLocalIdent,
+                            },
+                            'less-loader'
                         ),
                     },
                     // "file" loader makes sure those assets get served by WebpackDevServer.

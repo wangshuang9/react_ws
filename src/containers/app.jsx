@@ -1,7 +1,5 @@
 import React from "react";
-import Header from "comp/header";
 import Layout from "comp/layout";
-import Footer from "comp/footer";
 
 import "common/css/bootstrap.min.css";
 import "common/css/reset.css";
@@ -17,11 +15,7 @@ class App extends React.Component {
     }
     render() {
         return <div className="wraper">
-            <Header></Header>
-            <Layout>
-                this is enter page
-            </Layout>
-            <Footer></Footer>
+            <Layout></Layout>
         </div>
     }
 }
